@@ -1,17 +1,19 @@
 const express = require('express');
 const http = require('http');
 const path = require('path');
-const config = require('config');
+const config = require('./config');
 const log = require('./lib/log')(module);
 const mongoose = require('./lib/mongoose');
-const HttpError = require('error').HttpError;
+const HttpError = require('./error').HttpError;
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const session = require('express-session')
+const session = require('express-session');
+const favicon = require('express-favicon');
 
 const app = express();
 
 
+app.use(favicon(__dirname + '/public/favicon.ico'));
 if (app.get('env') === 'development') {
     app.use(morgan('dev'));
 } else {

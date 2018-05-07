@@ -1,5 +1,5 @@
 const User = require('../models/user').User;
-const HttpError = require('error').HttpError;
+const HttpError = require('../error').HttpError;
 const AuthError = require('../models/user').AuthError;
 const async = require('async');
 
