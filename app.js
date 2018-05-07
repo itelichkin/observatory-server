@@ -24,12 +24,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-// const sessionStore = require('./lib/sessionStore');
-
 app.use(session({
     secret: config.get('session:secret'),
     key: config.get('session:key'),
     cookie: config.get('session:cookie'),
+    resave: true,
+    saveUninitialized: true
   //  store: sessionStore
 }));
 
