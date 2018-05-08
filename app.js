@@ -11,16 +11,17 @@ const session = require('express-session');
 const favicon = require('express-favicon');
 
 const app = express();
-
+const router = express.Router();
 
 app.use(favicon(__dirname + '/public/favicon.ico'));
+
 if (app.get('env') === 'development') {
     app.use(morgan('dev'));
 } else {
     app.use(morgan('default'));
 }
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 app.use(cookieParser());
 
@@ -30,7 +31,7 @@ app.use(session({
     cookie: config.get('session:cookie'),
     resave: true,
     saveUninitialized: true
-  //  store: sessionStore
+    //  store: sessionStore
 }));
 
 
@@ -42,7 +43,7 @@ require('./routes')(app);
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
     if (typeof err === 'number') {
         err = new HttpError(err);
     }
@@ -60,7 +61,162 @@ app.use(function(err, req, res, next) {
     }
 });
 
+app.get('/space-objects', function (req, res) {
+    console.log('space-objects')
+    res.end('space-objects')
+});
+
+app.get('/space-object/:id', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('space-object GET', id)
+        res.end('space-object GET')
+    } else if (req.method === 'POST') {
+        const id = req.params.id;
+        console.log('space-object POST', id)
+        res.end('space-object POST')
+    } else if (req.method === 'DELETE') {
+        const id = req.params.id;
+        console.log('DELETE ID', id)
+        res.end('DELETE ID')
+    }
+
+});
+
+app.get('/space-object', function (req, res) {
+    if (req.method === 'POST') {
+        const id = req.params.id;
+        console.log('space-object NEW')
+        res.end('space-object NEW')
+    } else {
+        console.log('works NEW')
+        res.end('works NEW')
+    }
+});
+
+app.get('/universe', function (req, res) {
+    console.log('universe ')
+    res.end('universe')
+});
+
+app.get('/galaxies', function (req, res) {
+    console.log('galaxies ')
+    res.end('galaxies')
+});
+
+app.get('/galaxy/:id', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('galaxy GET', id)
+        res.end('galaxy GET')
+    } else if (req.method === 'POST') {
+        const id = req.params.id;
+        console.log('galaxy POST', id)
+        res.end('galaxy POST')
+    } else if (req.method === 'DELETE') {
+        const id = req.params.id;
+        console.log('DELETE galaxy', id)
+        res.end('DELETE galaxy')
+    }
+});
+
+app.get('/galaxy/:id/systems', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('galaxy systems GET', id)
+        res.end('galaxy systems GET')
+    }
+});
+
+app.get('/systems', function (req, res) {
+    console.log('systems ')
+    res.end('systems')
+});
+
+app.get('/system/:id', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('system GET', id)
+        res.end('system GET')
+    } else if (req.method === 'POST') {
+        const id = req.params.id;
+        console.log('system POST', id)
+        res.end('system POST')
+    } else if (req.method === 'DELETE') {
+        const id = req.params.id;
+        console.log('DELETE system', id)
+        res.end('DELETE system')
+    }
+});
+
+app.get('/system/:id/central-star', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('galaxy systems GET', id)
+        res.end('galaxy systems GET')
+    }
+});
+
+app.get('/system/:id/planets', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('galaxy systems GET', id)
+        res.end('galaxy systems GET')
+    }
+});
+
+app.get('/central-star/:id', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('central-star GET', id)
+        res.end('central-star GET')
+    } else if (req.method === 'POST') {
+        const id = req.params.id;
+        console.log('central-star POST', id)
+        res.end('central-star POST')
+    } else if (req.method === 'DELETE') {
+        const id = req.params.id;
+        console.log('DELETE central-star', id)
+        res.end('DELETE central-star')
+    }
+});
+app.get('/central-stars', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('central-stars', id)
+        res.end('central-stars')
+    }
+});
+
+
+app.get('/planets', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('planets', id)
+        res.end('planets')
+    }
+});
+
+app.get('/planet/:id', function (req, res) {
+    if (req.method === 'GET') {
+        const id = req.params.id;
+        console.log('planet GET', id)
+        res.end('planet GET')
+    } else if (req.method === 'POST') {
+        const id = req.params.id;
+        console.log('planet POST', id)
+        res.end('planet POST')
+    } else if (req.method === 'DELETE') {
+        const id = req.params.id;
+        console.log('DELETE planet', id)
+        res.end('DELETE planet')
+    }
+});
+
+
+
 const server = http.createServer(app);
-server.listen(config.get('port'), function(){
+server.listen(config.get('port'), function () {
     log.info('Express server listening on port ' + config.get('port'));
+
 });

@@ -1,14 +1,15 @@
 const User = require('../models/user').User;
 
-module.exports = function(req, res, next) {
-  req.user = res.locals.user = null;
+module.exports = function (req, res, next) {
 
-  if (!req.session.user) return next();
+    req.user = res.locals.user = null;
 
-  User.findById(req.session.user, function(err, user) {
-    if (err) return next(err);
+    if (!req.session.user) return next();
 
-    req.user = res.locals.user = user;
-    next();
-  });
+    User.findById(req.session.user, function (err, user) {
+        if (err) return next(err);
+
+        req.user = res.locals.user = user;
+        next();
+    });
 };
