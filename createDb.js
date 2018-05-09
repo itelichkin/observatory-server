@@ -13,6 +13,7 @@ async.series([
 });
 
 function open(callback) {
+    console.log('open')
     mongoose.connection.on('open', callback);
 }
 
