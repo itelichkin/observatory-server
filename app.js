@@ -9,9 +9,15 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const favicon = require('express-favicon');
+const sessionStore = require('./lib/sessionStore');
 
 const app = express();
 const router = express.Router();
+
+
+const observatoryDB = new require('./createDb');
+
+//const observatoryDB = new Observatory();
 
 app.use(favicon(__dirname + '/public/favicon.ico'));
 
@@ -21,7 +27,7 @@ if (app.get('env') === 'development') {
     app.use(morgan('default'));
 }
 
- app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: true}));
 
 // app.use(cookieParser());
 
@@ -30,8 +36,8 @@ app.use(session({
     key: config.get('session:key'),
     cookie: config.get('session:cookie'),
     resave: true,
-    saveUninitialized: true
-    //  store: sessionStore
+    saveUninitialized: true,
+    store: sessionStore
 }));
 
 
@@ -80,6 +86,7 @@ app.use(function (err, req, res, next) {
     }
 });
 
+
 app.get('/space-objects', function (req, res) {
     console.log('space-objects')
     res.end('space-objects')
@@ -114,14 +121,52 @@ app.get('/space-object', function (req, res) {
     }
 });
 
-app.get('/universe', function (req, res) {
-    console.log('universe ')
-    res.end('universe ');
+app.get('/universe', async function (req, res) {
+    const universe = await observatoryDB.universe.getUniverse();
+    let data = {};
+    if (universe && universe.length > 0) {
+        data = {
+            id: universe[0]._id,
+            name: universe[0].name,
+            weight: universe[0].weight,
+            speed: universe[0].speed,
+            discoverer: universe[0].discoverer,
+            position: {
+                x: universe[0].position.x,
+                y: universe[0].position.y
+            },
+            galaxiesAmount: universe[0].galaxiesAmount,
+            age: universe[0].age,
+            averageTemperature: universe[0].averageTemperature,
+            diameter: universe[0].diameter,
+            type: universe[0].type,
+        };
+    }
+    res.send(data);
 });
 
-app.get('/galaxies', function (req, res) {
-    console.log('galaxies ')
-    res.end('galaxies')
+app.get('/galaxies', async function (req, res) {
+    const galaxies = await observatoryDB.galaxies.getGalaxies();
+    let data = galaxies || [];
+   /* if (galaxies && galaxies.length > 0) {
+        data = {
+            id: universe[0]._id,
+            name: universe[0].name,
+            weight: universe[0].weight,
+            speed: universe[0].speed,
+            discoverer: universe[0].discoverer,
+            position: {
+                x: universe[0].position.x,
+                y: universe[0].position.y
+            },
+            galaxiesAmount: universe[0].galaxiesAmount,
+            age: universe[0].age,
+            averageTemperature: universe[0].averageTemperature,
+            diameter: universe[0].diameter,
+            type: universe[0].type,
+        };
+    }*/
+    res.send(data);
 });
 
 app.get('/galaxy/:id', function (req, res) {
@@ -148,9 +193,28 @@ app.get('/galaxy/:id/systems', function (req, res) {
     }
 });
 
-app.get('/systems', function (req, res) {
-    console.log('systems ')
-    res.end('systems')
+app.get('/systems', async function (req, res) {
+    const systems = await observatoryDB.systems.getSystems();
+    let data = systems || [];
+    /* if (galaxies && galaxies.length > 0) {
+         data = {
+             id: universe[0]._id,
+             name: universe[0].name,
+             weight: universe[0].weight,
+             speed: universe[0].speed,
+             discoverer: universe[0].discoverer,
+             position: {
+                 x: universe[0].position.x,
+                 y: universe[0].position.y
+             },
+             galaxiesAmount: universe[0].galaxiesAmount,
+             age: universe[0].age,
+             averageTemperature: universe[0].averageTemperature,
+             diameter: universe[0].diameter,
+             type: universe[0].type,
+         };
+     }*/
+    res.send(data);
 });
 
 app.get('/system/:id', function (req, res) {
@@ -200,20 +264,58 @@ app.get('/central-star/:id', function (req, res) {
         res.end('DELETE central-star')
     }
 });
-app.get('/central-stars', function (req, res) {
+app.get('/central-stars', async function (req, res) {
     if (req.method === 'GET') {
         const id = req.params.id;
-        console.log('central-stars', id)
-        res.end('central-stars')
+        const centralStars = await observatoryDB.centralStars.getCentralStars();
+        let data = centralStars || [];
+        /* if (galaxies && galaxies.length > 0) {
+             data = {
+                 id: universe[0]._id,
+                 name: universe[0].name,
+                 weight: universe[0].weight,
+                 speed: universe[0].speed,
+                 discoverer: universe[0].discoverer,
+                 position: {
+                     x: universe[0].position.x,
+                     y: universe[0].position.y
+                 },
+                 galaxiesAmount: universe[0].galaxiesAmount,
+                 age: universe[0].age,
+                 averageTemperature: universe[0].averageTemperature,
+                 diameter: universe[0].diameter,
+                 type: universe[0].type,
+             };
+         }*/
+        res.send(data);
     }
 });
 
 
-app.get('/planets', function (req, res) {
+app.get('/planets', async function (req, res) {
     if (req.method === 'GET') {
         const id = req.params.id;
-        console.log('planets', id)
-        res.end('planets')
+        const planets = await observatoryDB.planets.getPlanets();
+        let data = planets || [];
+        /* if (galaxies && galaxies.length > 0) {
+             data = {
+                 id: universe[0]._id,
+                 name: universe[0].name,
+                 weight: universe[0].weight,
+                 speed: universe[0].speed,
+                 discoverer: universe[0].discoverer,
+                 position: {
+                     x: universe[0].position.x,
+                     y: universe[0].position.y
+                 },
+                 galaxiesAmount: universe[0].galaxiesAmount,
+                 age: universe[0].age,
+                 averageTemperature: universe[0].averageTemperature,
+                 diameter: universe[0].diameter,
+                 type: universe[0].type,
+             };
+         }*/
+        res.send(data);
     }
 });
 
@@ -234,9 +336,7 @@ app.get('/planet/:id', function (req, res) {
 });
 
 
-
 const server = http.createServer(app);
 server.listen(config.get('port'), function () {
     log.info('Express server listening on port ' + config.get('port'));
-
 });
