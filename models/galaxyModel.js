@@ -4,7 +4,11 @@ const Schema = mongoose.Schema;
 
 const galaxiesDataSchema = new Schema({
     id: Schema.Types.ObjectId,
-    name: String,
+    name: {
+        type: String,
+        unique: true,
+        required: true
+    },
     weight: Number,
     speed: Number,
     discoverer: String,

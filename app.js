@@ -87,9 +87,9 @@ app.use(function (err, req, res, next) {
 });
 
 
-app.get('/space-objects', function (req, res) {
-    console.log('space-objects')
-    res.end('space-objects')
+app.get('/space-objects', async function (req, res) {
+    const allObjects = await observatoryDB.getAllSpaceObjects();
+    res.send(allObjects)
 });
 
 app.get('/space-object/:id', function (req, res) {
@@ -123,50 +123,12 @@ app.get('/space-object', function (req, res) {
 
 app.get('/universe', async function (req, res) {
     const universe = await observatoryDB.universe.getUniverse();
-    let data = {};
-    if (universe && universe.length > 0) {
-        data = {
-            id: universe[0]._id,
-            name: universe[0].name,
-            weight: universe[0].weight,
-            speed: universe[0].speed,
-            discoverer: universe[0].discoverer,
-            position: {
-                x: universe[0].position.x,
-                y: universe[0].position.y
-            },
-            galaxiesAmount: universe[0].galaxiesAmount,
-            age: universe[0].age,
-            averageTemperature: universe[0].averageTemperature,
-            diameter: universe[0].diameter,
-            type: universe[0].type,
-        };
-    }
-    res.send(data);
+    res.send(universe);
 });
 
 app.get('/galaxies', async function (req, res) {
     const galaxies = await observatoryDB.galaxies.getGalaxies();
-    let data = galaxies || [];
-   /* if (galaxies && galaxies.length > 0) {
-        data = {
-            id: universe[0]._id,
-            name: universe[0].name,
-            weight: universe[0].weight,
-            speed: universe[0].speed,
-            discoverer: universe[0].discoverer,
-            position: {
-                x: universe[0].position.x,
-                y: universe[0].position.y
-            },
-            galaxiesAmount: universe[0].galaxiesAmount,
-            age: universe[0].age,
-            averageTemperature: universe[0].averageTemperature,
-            diameter: universe[0].diameter,
-            type: universe[0].type,
-        };
-    }*/
-    res.send(data);
+    res.send(galaxies);
 });
 
 app.get('/galaxy/:id', function (req, res) {
@@ -195,26 +157,7 @@ app.get('/galaxy/:id/systems', function (req, res) {
 
 app.get('/systems', async function (req, res) {
     const systems = await observatoryDB.systems.getSystems();
-    let data = systems || [];
-    /* if (galaxies && galaxies.length > 0) {
-         data = {
-             id: universe[0]._id,
-             name: universe[0].name,
-             weight: universe[0].weight,
-             speed: universe[0].speed,
-             discoverer: universe[0].discoverer,
-             position: {
-                 x: universe[0].position.x,
-                 y: universe[0].position.y
-             },
-             galaxiesAmount: universe[0].galaxiesAmount,
-             age: universe[0].age,
-             averageTemperature: universe[0].averageTemperature,
-             diameter: universe[0].diameter,
-             type: universe[0].type,
-         };
-     }*/
-    res.send(data);
+    res.send(systems);
 });
 
 app.get('/system/:id', function (req, res) {
@@ -268,26 +211,7 @@ app.get('/central-stars', async function (req, res) {
     if (req.method === 'GET') {
         const id = req.params.id;
         const centralStars = await observatoryDB.centralStars.getCentralStars();
-        let data = centralStars || [];
-        /* if (galaxies && galaxies.length > 0) {
-             data = {
-                 id: universe[0]._id,
-                 name: universe[0].name,
-                 weight: universe[0].weight,
-                 speed: universe[0].speed,
-                 discoverer: universe[0].discoverer,
-                 position: {
-                     x: universe[0].position.x,
-                     y: universe[0].position.y
-                 },
-                 galaxiesAmount: universe[0].galaxiesAmount,
-                 age: universe[0].age,
-                 averageTemperature: universe[0].averageTemperature,
-                 diameter: universe[0].diameter,
-                 type: universe[0].type,
-             };
-         }*/
-        res.send(data);
+        res.send(centralStars);
     }
 });
 
@@ -296,26 +220,7 @@ app.get('/planets', async function (req, res) {
     if (req.method === 'GET') {
         const id = req.params.id;
         const planets = await observatoryDB.planets.getPlanets();
-        let data = planets || [];
-        /* if (galaxies && galaxies.length > 0) {
-             data = {
-                 id: universe[0]._id,
-                 name: universe[0].name,
-                 weight: universe[0].weight,
-                 speed: universe[0].speed,
-                 discoverer: universe[0].discoverer,
-                 position: {
-                     x: universe[0].position.x,
-                     y: universe[0].position.y
-                 },
-                 galaxiesAmount: universe[0].galaxiesAmount,
-                 age: universe[0].age,
-                 averageTemperature: universe[0].averageTemperature,
-                 diameter: universe[0].diameter,
-                 type: universe[0].type,
-             };
-         }*/
-        res.send(data);
+        res.send(planets);
     }
 });
 
