@@ -7,6 +7,7 @@ const mongoose = require('./lib/mongoose');
 const HttpError = require('./error').HttpError;
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser')
 const session = require('express-session');
 const favicon = require('express-favicon');
 const sessionStore = require('./lib/sessionStore');
@@ -28,6 +29,11 @@ if (app.get('env') === 'development') {
 }
 
 app.use(express.urlencoded({extended: true}));
+
+app.use(bodyParser.json());       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+    extended: true
+}));
 
 // app.use(cookieParser());
 
@@ -86,39 +92,40 @@ app.use(function (err, req, res, next) {
     }
 });
 
-
 app.get('/space-objects', async function (req, res) {
     const allObjects = await observatoryDB.getAllSpaceObjects();
     res.send(allObjects)
 });
 
-app.get('/space-object/:id', function (req, res) {
-    if (req.method === 'GET') {
-        const id = req.params.id;
-        console.log('space-object GET', id)
-        res.end('space-object GET')
-    } else if (req.method === 'POST') {
-        const id = req.params.id;
-        console.log('space-object POST', id)
-        res.end('space-object POST')
-    } else if (req.method === 'DELETE') {
-        const id = req.params.id;
-        console.log('DELETE ID', id)
-        res.end('DELETE ID')
-    }
-
+app.post('/space-object/:type/:id', async function (req, res) {
+    const id = req.params.id;
+    const type = req.params.type;
+    const object = await observatoryDB.editObjectById(id, type, req.body);
+    res.send({modify: !!object});
 });
 
-app.get('/space-object', function (req, res) {
-    if (req.method === 'POST') {
+app.delete('/space-object/:type/:id', async function (req, res) {
+    const id = req.params.id;
+    const type = req.params.type;
+    const object = await observatoryDB.removeObject(id, type);
+    res.send({removed: !!object});
+});
+
+
+app.get('/space-object/:type/:id', async function (req, res) {
+    if (req.method === 'GET') {
         const id = req.params.id;
-        console.log('space-object NEW')
-        res.ok();
-        res.end('space-object NEW')
-    } else {
-        console.log('works NEW')
-        res.end('works NEW')
+        const type = req.params.type;
+        const object = await observatoryDB.getObjectById(id, type);
+        res.send(object)
     }
+});
+
+app.post('/space-object', async function (req, res) {
+    const id = req.params.id;
+    const type = req.params.type;
+    const object = await observatoryDB.createSpaceObject(id, type, req.body);
+    res.send({saved: !!object});
 });
 
 app.get('/universe', async function (req, res) {
@@ -136,14 +143,6 @@ app.get('/galaxy/:id', function (req, res) {
         const id = req.params.id;
         console.log('galaxy GET', id)
         res.end('galaxy GET')
-    } else if (req.method === 'POST') {
-        const id = req.params.id;
-        console.log('galaxy POST', id)
-        res.end('galaxy POST')
-    } else if (req.method === 'DELETE') {
-        const id = req.params.id;
-        console.log('DELETE galaxy', id)
-        res.end('DELETE galaxy')
     }
 });
 
@@ -165,14 +164,6 @@ app.get('/system/:id', function (req, res) {
         const id = req.params.id;
         console.log('system GET', id)
         res.end('system GET')
-    } else if (req.method === 'POST') {
-        const id = req.params.id;
-        console.log('system POST', id)
-        res.end('system POST')
-    } else if (req.method === 'DELETE') {
-        const id = req.params.id;
-        console.log('DELETE system', id)
-        res.end('DELETE system')
     }
 });
 
@@ -197,14 +188,6 @@ app.get('/central-star/:id', function (req, res) {
         const id = req.params.id;
         console.log('central-star GET', id)
         res.end('central-star GET')
-    } else if (req.method === 'POST') {
-        const id = req.params.id;
-        console.log('central-star POST', id)
-        res.end('central-star POST')
-    } else if (req.method === 'DELETE') {
-        const id = req.params.id;
-        console.log('DELETE central-star', id)
-        res.end('DELETE central-star')
     }
 });
 app.get('/central-stars', async function (req, res) {
@@ -229,14 +212,6 @@ app.get('/planet/:id', function (req, res) {
         const id = req.params.id;
         console.log('planet GET', id)
         res.end('planet GET')
-    } else if (req.method === 'POST') {
-        const id = req.params.id;
-        console.log('planet POST', id)
-        res.end('planet POST')
-    } else if (req.method === 'DELETE') {
-        const id = req.params.id;
-        console.log('DELETE planet', id)
-        res.end('DELETE planet')
     }
 });
 

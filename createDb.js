@@ -699,7 +699,160 @@ observatorySchema.methods.getAllSpaceObjects = async function () {
     return universe.concat(galaxies, systems, centralStars, planets);
 };
 
-const ObservatoryModel = mongoose.model('ObservatoryModel', observatorySchema);
+async function getSpaceObject(id, type, callBack) {
+    let object;
+    switch (type) {
+        case 'Universe':
+            const universe = await Observatory.universe.getUniverse();
+            if (universe.id.toString() === id.toString()) object = universe;
+            break;
+        case 'Galaxy':
+            await GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
+                if (err) {
+                    // TODO: Handle the error!
+                } else {
+                    if (data && !callBack) {
+                        object = data;
+                    } else if (data && callBack) {
+                        callBack(data);
+                        object = true;
+                    } else {
+                        object = null;
+                    }
+                }
+            });
+            break;
+        case 'System':
+            await SystemsDataSchema.findOne({_id: id}, function (err, data) {
+                if (err) {
+                    // TODO: Handle the error!
+                } else {
+                    if (data && !callBack) {
+                        object = data;
+                    } else if (data && callBack) {
+                        callBack(data);
+                        object = true;
+                    } else {
+                        object = null;
+                    }
+                }
+            });
+            break;
+        case 'Star':
+            await CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
+                if (err) {
+                    // TODO: Handle the error!
+                } else {
+                    if (data && !callBack) {
+                        object = data;
+                    } else if (data && callBack) {
+                        callBack(data);
+                        object = true;
+                    } else {
+                        object = null;
+                    }
+                }
+            });
+            break;
+        case 'Planet':
+            await PlanetsDataSchema.findOne({_id: id}, function (err, data) {
+                if (err) {
+                    // TODO: Handle the error!
+                } else {
+                    if (data && !callBack) {
+                        object = data;
+                    } else if (data && callBack) {
+                        callBack(data);
+                        object = true;
+                    } else {
+                        object = null;
+                    }
+                }
+            });
+            break;
+        default:
+            object = null;
+    }
+    return object;
+}
+
+observatorySchema.methods.getObjectById = async function (id, type) {
+    return await getSpaceObject(id, type, null);
+};
+
+observatorySchema.methods.createSpaceObject = async function (id, type, data) {
+    let result;
+    switch (type) {
+        case 'Universe':
+            const universe = new mongoose.models.UniverseDataSchema(data);
+            universe.save();
+            result = true;
+            break;
+        case 'Galaxy':
+            const galaxy = new mongoose.models.GalaxiesDataSchema(data);
+            galaxy.save();
+            result = true;
+            break;
+        case 'System':
+            const system = new mongoose.models.SystemsDataSchema(data);
+            system.save();
+            result = true;
+            break;
+        case 'Star':
+            const star = new mongoose.models.CentralStarsDataSchema(data);
+            star.save();
+            result = true;
+            break;
+        case 'Planet':
+            const planet = new mongoose.models.PlanetsDataSchema(data);
+            planet.save();
+            result = true;
+            break;
+        default:
+            result = false;
+    }
+    return result;
+};
+
+observatorySchema.methods.editObjectById = async function (id, type, data) {
+    const callBack = (object) => {
+        switch (type) {
+            case 'Universe':
+            case 'Galaxy':
+            case 'System':
+            case 'Star':
+            case 'Planet':
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        if ((key !== 'id' || key !== '_id') && !!object[key] && key !== 'type') {
+                            object[key] = data[key];
+                        }
+                    }
+                }
+                object.save();
+                break;
+        }
+    };
+    return await getSpaceObject(id, type, callBack);
+};
+
+observatorySchema.methods.removeObject = async function (id, type) {
+    const callBack = (object) => {
+        switch (type) {
+            case 'Universe':
+            case 'Galaxy':
+            case 'System':
+            case 'Star':
+            case 'Planet':
+                object.remove();
+                break;
+        }
+    };
+    return await getSpaceObject(id, type, callBack);
+};
+
+
+ObservatoryModel = mongoose.model('ObservatoryModel', observatorySchema);
 
 const Observatory = new ObservatoryModel({
     universe: Universe,
