@@ -12,7 +12,7 @@ const centralStarsDataSchema = new Schema({
     weight: Number,
     speed: Number,
     discoverer: String,
-    systemId: Number,
+    systemId: String,
     position: {
         x: Number,
         y: Number

@@ -6,6 +6,7 @@ require('./models/galaxyModel');
 require('./models/systemModel');
 require('./models/centralStarModel');
 require('./models/planetModel');
+require('./models/observerModel');
 
 const Schema = mongoose.Schema;
 
@@ -14,6 +15,7 @@ const GalaxiesDataSchema = mongoose.models.GalaxiesDataSchema;
 const SystemsDataSchema = mongoose.models.SystemsDataSchema;
 const CentralStarsDataSchema = mongoose.models.CentralStarsDataSchema;
 const PlanetsDataSchema = mongoose.models.PlanetsDataSchema;
+const ObserversDataSchema = mongoose.models.ObserversDataSchema;
 
 let db = mongoose.connection;
 
@@ -22,6 +24,7 @@ const galaxiesSchema = new Schema();
 const systemsSchema = new Schema();
 const centralStarsSchema = new Schema();
 const planetsSchema = new Schema();
+const observersSchema = new Schema();
 
 
 async.series([
@@ -30,7 +33,8 @@ async.series([
     checkGalaxies,
     checkSystems,
     checkCentralStars,
-    checkPlanets
+    checkPlanets,
+    checkObservers
 ], function (err) {
     if (err) {
         console.log(err)
@@ -80,7 +84,8 @@ function checkUniverse(mainCallback) {
 }
 
 function checkGalaxies(mainCallback) {
-    //  GalaxiesDataSchema.remove({})
+    /* await GalaxiesDataSchema.remove({}, function () {
+             })*/
     async.waterfall([
         function (callback) {
             GalaxiesDataSchema.find({}, function (error, res) {
@@ -94,11 +99,11 @@ function checkGalaxies(mainCallback) {
             if (!galaxies || galaxies.length === 0) {
                 async.each(defaultGalaxiesData, function (galaxyData, callback) {
                     const _galaxy = new mongoose.models.GalaxiesDataSchema(galaxyData);
-                    _galaxy.save(callback);
-                }, callback);
+                    _galaxy.save();
+                });
             }
             callback(null, 'done')
-        },
+        }
     ], function (err, result) {
         if (err) {
             throw new Error(err);
@@ -108,7 +113,7 @@ function checkGalaxies(mainCallback) {
 }
 
 function checkSystems(mainCallback) {
-    //  await SystemsDataSchema.remove({});
+//      await SystemsDataSchema.remove({});
     async.waterfall([
         function (callback) {
             SystemsDataSchema.find({}, function (error, res) {
@@ -120,10 +125,23 @@ function checkSystems(mainCallback) {
         },
         function (systems, callback) {
             if (!systems || systems.length === 0) {
-                async.each(defaultSystemsData, function (systemData, callback) {
-                    const _system = new mongoose.models.SystemsDataSchema(systemData);
-                    _system.save(callback);
-                }, callback);
+                async.waterfall([
+                    function (callback_2) {
+                        GalaxiesDataSchema.findOne({name: 'Milky Way'}, function (err, galaxy) {
+                            if (err) {
+                            }
+                            callback_2(null, galaxy);
+                        })
+                    }, function (galaxy, callback_2) {
+                        async.each(defaultSystemsData, function (systemData, callback) {
+                            if (galaxy) {
+                                systemData.galaxyId = galaxy._id
+                            }
+                            const _system = new mongoose.models.SystemsDataSchema(systemData);
+                            _system.save();
+                        });
+                    }
+                ]);
             }
             callback(null, 'done');
         },
@@ -148,10 +166,23 @@ function checkCentralStars(mainCallback) {
         },
         function (centralStars, callback) {
             if (!centralStars || centralStars.length === 0) {
-                async.each(defaultCentralStarsData, function (starData, callback) {
-                    const _star = new mongoose.models.CentralStarsDataSchema(starData);
-                    _star.save(callback);
-                }, callback);
+                async.waterfall([
+                    function (callback_2) {
+                        SystemsDataSchema.findOne({name: 'Solar System'}, function (err, system) {
+                            if (err) {
+                            }
+                            callback_2(null, system);
+                        })
+                    }, function (system, callback_2) {
+                        async.each(defaultCentralStarsData, function (starData, callback) {
+                            if (system) {
+                                starData.systemId = system._id
+                            }
+                            const _star = new mongoose.models.CentralStarsDataSchema(starData);
+                            _star.save();
+                        });
+                    }
+                ]);
             }
             callback(null, 'done');
         },
@@ -176,10 +207,23 @@ function checkPlanets(mainCallback) {
         },
         function (planets, callback) {
             if (!planets || planets.length === 0) {
-                async.each(defaultPlanetsData, function (planetData, callback) {
-                    const _planet = new mongoose.models.PlanetsDataSchema(planetData);
-                    _planet.save(callback);
-                }, callback);
+                async.waterfall([
+                    function (callback_2) {
+                        SystemsDataSchema.findOne({name: 'Solar System'}, function (err, system) {
+                            if (err) {
+                            }
+                            callback_2(null, system);
+                        })
+                    }, function (system, callback_2) {
+                        async.each(defaultPlanetsData, function (planetData, callback) {
+                            if (system) {
+                                planetData.systemId = system._id
+                            }
+                            const _planet = new mongoose.models.PlanetsDataSchema(planetData);
+                            _planet.save();
+                        });
+                    }
+                ]);
             }
             callback(null, 'done');
         },
@@ -191,6 +235,34 @@ function checkPlanets(mainCallback) {
     });
 }
 
+function checkObservers(mainCallback) {
+    // ObserversDataSchema.remove({});
+    async.waterfall([
+        function (callback) {
+            ObserversDataSchema.find({}, function (error, res) {
+                if (error) {
+                    throw new Error(error);
+                }
+                callback(null, res);
+            });
+        },
+        function (observers, callback) {
+            if (!observers || observers.length === 0) {
+                async.each(defaultObserversData, function (observerData, callback) {
+                    const _observer = new mongoose.models.ObserversDataSchema(observerData);
+                    _observer.save(callback);
+                }, callback);
+            }
+            callback(null, 'done');
+        },
+    ], function (err, result) {
+        if (err) {
+            throw new Error(err);
+        }
+        mainCallback(null, 'observer')
+    });
+}
+
 universeSchema.statics.getUniverse = async function () {
     let _universe = {};
     await UniverseDataSchema.find({type: 'Universe'}, function (error, res) {
@@ -198,55 +270,91 @@ universeSchema.statics.getUniverse = async function () {
             throw new Error(error);
         }
         if (res && res.length > 0) {
-            _universe = {
-                id: res[0]._id,
-                name: res[0].name,
-                weight: res[0].weight,
-                speed: res[0].speed,
-                discoverer: res[0].discoverer,
-                position: {
-                    x: res[0].position.x,
-                    y: res[0].position.y
-                },
-                galaxiesAmount: res[0].galaxiesAmount,
-                age: res[0].age,
-                averageTemperature: res[0].averageTemperature,
-                diameter: res[0].diameter,
-                type: res[0].type,
-            };
+            _universe = generateUniverseData(res[0]);
         }
     });
     return _universe || {};
 };
 
+function generateUniverseData(univ) {
+    return {
+        id: univ._id,
+        name: univ.name,
+        weight: univ.weight,
+        speed: univ.speed,
+        discoverer: univ.discoverer,
+        position: {
+            x: univ.position.x,
+            y: univ.position.y
+        },
+        galaxiesAmount: univ.galaxiesAmount,
+        age: univ.age,
+        averageTemperature: univ.averageTemperature,
+        diameter: univ.diameter,
+        type: univ.type,
+    }
+}
+
 galaxiesSchema.statics.getGalaxies = async function () {
-    let _glaxies = [];
+    let _galaxies = [];
     await GalaxiesDataSchema.find({type: 'Galaxy'}, function (error, res) {
         if (error) {
             throw new Error(error);
         }
         if (res) {
             res.forEach((gal) => {
-                const galaxy = {
-                    id: gal._id,
-                    name: gal.name,
-                    weight: gal.weight,
-                    speed: gal.speed,
-                    discoverer: gal.discoverer,
-                    position: {
-                        x: gal.position.x,
-                        y: gal.position.y
-                    },
-                    diameter: gal.diameter,
-                    numberOfStars: gal.numberOfStars,
-                    thickness: gal.thickness,
-                    type: gal.type
-                };
-                _glaxies.push(galaxy);
+                const galaxy = generateGalaxyData(gal);
+                _galaxies.push(galaxy);
             });
         }
     });
-    return _glaxies || [];
+    return _galaxies || [];
+};
+
+galaxiesSchema.statics.getGalaxyById = async function (id) {
+    let galaxy;
+    await GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
+        if (err) {
+
+        }
+        if (data) {
+            galaxy = generateGalaxyData(data);
+        }
+    });
+    return galaxy;
+};
+
+function generateGalaxyData(gal) {
+    return {
+        id: gal._id,
+        name: gal.name,
+        weight: gal.weight,
+        speed: gal.speed,
+        discoverer: gal.discoverer,
+        position: {
+            x: gal.position.x,
+            y: gal.position.y
+        },
+        diameter: gal.diameter,
+        numberOfStars: gal.numberOfStars,
+        thickness: gal.thickness,
+        type: gal.type
+    }
+}
+
+galaxiesSchema.statics.getSystemsByGalaxyId = async function (id) {
+    let systems = [];
+    await SystemsDataSchema.find({galaxyId: id}, function (err, data) {
+        if (err) {
+
+        }
+        if (data) {
+            data.forEach((system) => {
+                systems.push(generateSystemData(system))
+            });
+        }
+    });
+    return systems;
 };
 
 systemsSchema.statics.getSystems = async function () {
@@ -257,32 +365,79 @@ systemsSchema.statics.getSystems = async function () {
         }
         if (res) {
             res.forEach((sys) => {
-                const system = {
-                    id: sys._id,
-                    name: sys.name,
-                    weight: sys.weight,
-                    speed: sys.speed,
-                    discoverer: sys.discoverer,
-                    galaxyId: sys.galaxyId,
-                    position: {
-                        x: sys.position.x,
-                        y: sys.position.y
-                    },
-                    type: sys.type,
-                    imageName: sys.imageName,
-                    age: sys.age,
-                    starsAmount: sys.starsAmount,
-                    planetsAmount: sys.planetsAmount,
-                    dwarfPlanetAmount: sys.dwarfPlanetAmount,
-                    satellitesAmount: sys.satellitesAmount,
-                    smallBodyAmount: sys.smallBodyAmount,
-                    cometAmount: sys.cometAmount
-                };
+                const system = generateSystemData(sys);
                 _systems.push(system);
             });
         }
     });
     return _systems || [];
+};
+
+systemsSchema.statics.getSystemById = async function (id) {
+    let system;
+    await SystemsDataSchema.findOne({_id: id}, function (err, data) {
+        if (err) {
+
+        }
+        if (data) {
+            system = generateSystemData(data);
+        }
+    });
+    return system;
+};
+
+function generateSystemData(sys) {
+    return {
+        id: sys._id,
+        name: sys.name,
+        weight: sys.weight,
+        speed: sys.speed,
+        discoverer: sys.discoverer,
+        galaxyId: sys.galaxyId,
+        position: {
+            x: sys.position.x,
+            y: sys.position.y
+        },
+        type: sys.type,
+        imageName: sys.imageName,
+        age: sys.age,
+        starsAmount: sys.starsAmount,
+        planetsAmount: sys.planetsAmount,
+        dwarfPlanetAmount: sys.dwarfPlanetAmount,
+        satellitesAmount: sys.satellitesAmount,
+        smallBodyAmount: sys.smallBodyAmount,
+        cometAmount: sys.cometAmount
+    }
+}
+
+systemsSchema.statics.getCentralStarsBySystemId = async function (id) {
+    let stars = [];
+    await CentralStarsDataSchema.find({systemId: id}, function (err, data) {
+        if (err) {
+
+        }
+        if (data) {
+            data.forEach((star) => {
+                stars.push(generatePlanetData(star))
+            });
+        }
+    });
+    return stars;
+};
+
+systemsSchema.statics.getPlanetsBySystemId = async function (id) {
+    let planets = [];
+    await PlanetsDataSchema.find({systemId: id}, function (err, data) {
+        if (err) {
+
+        }
+        if (data && data.length > 0) {
+            data.forEach((planet) => {
+                planets.push(generatePlanetData(planet))
+            });
+        }
+    });
+    return planets;
 };
 
 centralStarsSchema.statics.getCentralStars = async function () {
@@ -293,30 +448,47 @@ centralStarsSchema.statics.getCentralStars = async function () {
         }
         if (res) {
             res.forEach((center) => {
-                const star = {
-                    id: center._id,
-                    name: center.name,
-                    weight: center.weight,
-                    speed: center.speed,
-                    discoverer: center.discoverer,
-                    systemId: center.systemId,
-                    position: {
-                        x: center.position.x,
-                        y: center.position.y
-                    },
-                    size: {
-                        width: center.size.width,
-                        height: center.size.height
-                    },
-                    type: center.type,
-                    imageName: center.imageName
-                };
+                const star = generateStarData(center);
                 _centralStars.push(star);
             });
         }
     });
     return _centralStars || [];
 };
+
+centralStarsSchema.statics.getCentralStarById = async function (id) {
+    let star;
+    await CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
+        if (err) {
+
+        }
+        if (data) {
+            star = generateStarData(data);
+        }
+    });
+    return star;
+};
+
+function generateStarData(center) {
+    return {
+        id: center._id,
+        name: center.name,
+        weight: center.weight,
+        speed: center.speed,
+        discoverer: center.discoverer,
+        systemId: center.systemId,
+        position: {
+            x: center.position.x,
+            y: center.position.y
+        },
+        size: {
+            width: center.size.width,
+            height: center.size.height
+        },
+        type: center.type,
+        imageName: center.imageName
+    };
+}
 
 planetsSchema.statics.getPlanets = async function () {
     let _planets = [];
@@ -326,27 +498,7 @@ planetsSchema.statics.getPlanets = async function () {
         }
         if (res) {
             res.forEach((plan) => {
-                const planet = {
-                    id: plan._id,
-                    name: plan.name,
-                    weight: plan.weight,
-                    speed: plan.speed,
-                    discoverer: plan.discoverer,
-                    systemId: plan.systemId,
-                    position: {
-                        x: plan.position.x,
-                        y: plan.position.y
-                    },
-                    size: {
-                        width: plan.size.width,
-                        height: plan.size.height
-                    },
-                    type: plan.type,
-                    imageName: plan.imageName,
-                    parentRadius: plan.parentRadius,
-                    angle: plan.angle,
-                    orbitSpeed: plan.orbitSpeed
-                };
+                const planet = generatePlanetData(plan);
                 _planets.push(planet);
             });
         }
@@ -354,11 +506,118 @@ planetsSchema.statics.getPlanets = async function () {
     return _planets || [];
 };
 
+planetsSchema.statics.getPlanetById = async function (id) {
+    let planet = null;
+    await PlanetsDataSchema.findOne({_id: id}, function (err, data) {
+        if (err) {
+
+        }
+        if (data) {
+            planet = generatePlanetData(data);
+        }
+    });
+    return planet;
+};
+
+function generatePlanetData(plan) {
+    return {
+        id: plan._id,
+        name: plan.name,
+        weight: plan.weight,
+        speed: plan.speed,
+        discoverer: plan.discoverer,
+        systemId: plan.systemId,
+        position: {
+            x: plan.position.x,
+            y: plan.position.y
+        },
+        size: {
+            width: plan.size.width,
+            height: plan.size.height
+        },
+        type: plan.type,
+        imageName: plan.imageName,
+        parentRadius: plan.parentRadius,
+        angle: plan.angle,
+        orbitSpeed: plan.orbitSpeed,
+        observers: plan.observers
+    };
+}
+
+observersSchema.statics.getObservers = async function () {
+    let observers = [];
+    await ObserversDataSchema.find({}, function (err, data) {
+        if (err) {
+
+        }
+        if (data && data.length > 0) {
+            data.forEach((observer) => {
+                observers.push({id: observer._id, name: observer.name, observablePlanets: observer.observablePlanets});
+            })
+        }
+    });
+    return observers;
+};
+
+observersSchema.statics.setObservers = async function (data) {
+    const observerId = data['observerId'];
+    const planetId = data['planetId'];
+    await ObserversDataSchema.findOne({_id: observerId}, function (err, data) {
+        if (err) {
+
+        }
+        console.log(data)
+        if (data) {
+            if (data.observablePlanets && data.observablePlanets.length > 0) {
+                let isExist = false;
+                data.observablePlanets.some((planet) => {
+                    if (planet === planetId) {
+                        isExist = true;
+                        return true;
+                    }
+                });
+                if (!isExist) {
+                    data.observablePlanets.push(planetId);
+                    data.save();
+                }
+            } else {
+                data.observablePlanets.push(planetId);
+                data.save();
+            }
+        }
+    });
+    await PlanetsDataSchema.findOne({_id: planetId}, function (err, data) {
+        if (err) {
+
+        }
+        if (data) {
+            if (data.observers && data.observers.length > 0) {
+                let isExist = false;
+                data.observers.some((observer) => {
+                    if (observer === observerId) {
+                        isExist = true;
+                        return true;
+                    }
+                });
+                if (!isExist) {
+                    data.observers.push(observerId);
+                    data.save();
+                }
+            } else {
+                data.observers.push(observerId);
+                data.save();
+            }
+        }
+    });
+    return {modify: true}
+};
+
 const Universe = mongoose.model('Universe', universeSchema);
 const Galaxies = mongoose.model('Galaxies', galaxiesSchema);
 const Systems = mongoose.model('Systems', systemsSchema);
 const CentralStars = mongoose.model('CentralStars', centralStarsSchema);
 const Planets = mongoose.model('Planets', planetsSchema);
+const Observers = mongoose.model('Observers', observersSchema);
 
 const defaultUniverseData = {
     name: 'Universe',
@@ -538,7 +797,8 @@ const defaultPlanetsData = [
         imageName: 'mercury',
         parentRadius: 70,
         angle: 90,
-        orbitSpeed: 88
+        orbitSpeed: 88,
+        observers: []
     },
     {
         name: 'Venus',
@@ -558,7 +818,8 @@ const defaultPlanetsData = [
         imageName: 'venus',
         parentRadius: 100,
         angle: 90,
-        orbitSpeed: 116
+        orbitSpeed: 116,
+        observers: []
     },
     {
         name: 'Earth',
@@ -578,7 +839,8 @@ const defaultPlanetsData = [
         imageName: 'earth',
         parentRadius: 133,
         angle: 90,
-        orbitSpeed: 365
+        orbitSpeed: 365,
+        observers: []
     },
     {
         name: 'Mars',
@@ -598,7 +860,8 @@ const defaultPlanetsData = [
         imageName: 'mars',
         parentRadius: 160,
         angle: 90,
-        orbitSpeed: 687
+        orbitSpeed: 687,
+        observers: []
     },
     {
         name: 'Jupiter',
@@ -618,7 +881,8 @@ const defaultPlanetsData = [
         imageName: 'jupiter',
         parentRadius: 200,
         angle: 90,
-        orbitSpeed: 4343
+        orbitSpeed: 4343,
+        observers: []
     },
     {
         name: 'Saturn',
@@ -638,7 +902,8 @@ const defaultPlanetsData = [
         imageName: 'saturn',
         parentRadius: 300,
         angle: 90,
-        orbitSpeed: 10759
+        orbitSpeed: 10759,
+        observers: []
     },
     {
         name: 'Uranus',
@@ -658,7 +923,8 @@ const defaultPlanetsData = [
         imageName: 'uranus',
         parentRadius: 350,
         angle: 90,
-        orbitSpeed: 30660
+        orbitSpeed: 30660,
+        observers: []
     },
     {
         name: 'Neptune',
@@ -678,8 +944,15 @@ const defaultPlanetsData = [
         imageName: 'neptune',
         parentRadius: 400,
         angle: 90,
-        orbitSpeed: 60148
+        orbitSpeed: 60148,
+        observers: []
     }
+];
+const defaultObserversData = [
+    {name: 'Ukraine', observablePlanets: []},
+    {name: 'USA', observablePlanets: []},
+    {name: 'CANADA', observablePlanets: []},
+    {name: 'France', observablePlanets: []},
 ];
 
 const observatorySchema = new Schema({
@@ -688,15 +961,16 @@ const observatorySchema = new Schema({
     systems: Object,
     centralStars: Object,
     planets: Object,
+    observers: Object
 });
 
 observatorySchema.methods.getAllSpaceObjects = async function () {
-    const universe = [await Observatory.universe.getUniverse()];
-    const galaxies = await Observatory.galaxies.getGalaxies();
-    const systems = await Observatory.systems.getSystems();
-    const centralStars = await Observatory.centralStars.getCentralStars();
-    const planets = await Observatory.planets.getPlanets();
-    return universe.concat(galaxies, systems, centralStars, planets);
+     const universe = [await Observatory.universe.getUniverse()];
+     const galaxies = await Observatory.galaxies.getGalaxies();
+     const systems = await Observatory.systems.getSystems();
+     const centralStars = await Observatory.centralStars.getCentralStars();
+     const planets = await Observatory.planets.getPlanets();
+     return universe.concat(galaxies, systems, centralStars, planets);
 };
 
 async function getSpaceObject(id, type, callBack) {
@@ -704,7 +978,7 @@ async function getSpaceObject(id, type, callBack) {
     switch (type) {
         case 'Universe':
             const universe = await Observatory.universe.getUniverse();
-            if (universe.id.toString() === id.toString()) object = universe;
+            if (universe.id.toString() === id.toString()) object = generateUniverseData(universe);
             break;
         case 'Galaxy':
             await GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
@@ -712,7 +986,7 @@ async function getSpaceObject(id, type, callBack) {
                     // TODO: Handle the error!
                 } else {
                     if (data && !callBack) {
-                        object = data;
+                        object = generateGalaxyData(data);
                     } else if (data && callBack) {
                         callBack(data);
                         object = true;
@@ -728,7 +1002,7 @@ async function getSpaceObject(id, type, callBack) {
                     // TODO: Handle the error!
                 } else {
                     if (data && !callBack) {
-                        object = data;
+                        object = generateGalaxyData(data);
                     } else if (data && callBack) {
                         callBack(data);
                         object = true;
@@ -744,7 +1018,7 @@ async function getSpaceObject(id, type, callBack) {
                     // TODO: Handle the error!
                 } else {
                     if (data && !callBack) {
-                        object = data;
+                        object = generateStarData(data);
                     } else if (data && callBack) {
                         callBack(data);
                         object = true;
@@ -760,7 +1034,7 @@ async function getSpaceObject(id, type, callBack) {
                     // TODO: Handle the error!
                 } else {
                     if (data && !callBack) {
-                        object = data;
+                        object = generatePlanetData(data);
                     } else if (data && callBack) {
                         callBack(data);
                         object = true;
@@ -780,9 +1054,9 @@ observatorySchema.methods.getObjectById = async function (id, type) {
     return await getSpaceObject(id, type, null);
 };
 
-observatorySchema.methods.createSpaceObject = async function (id, type, data) {
+observatorySchema.methods.createSpaceObject = async function (data) {
     let result;
-    switch (type) {
+    switch (data.type) {
         case 'Universe':
             const universe = new mongoose.models.UniverseDataSchema(data);
             universe.save();
@@ -814,9 +1088,9 @@ observatorySchema.methods.createSpaceObject = async function (id, type, data) {
     return result;
 };
 
-observatorySchema.methods.editObjectById = async function (id, type, data) {
+observatorySchema.methods.editObjectById = async function (data) {
     const callBack = (object) => {
-        switch (type) {
+        switch (data.type) {
             case 'Universe':
             case 'Galaxy':
             case 'System':
@@ -833,7 +1107,7 @@ observatorySchema.methods.editObjectById = async function (id, type, data) {
                 break;
         }
     };
-    return await getSpaceObject(id, type, callBack);
+    return await getSpaceObject(data.id, data.type, callBack);
 };
 
 observatorySchema.methods.removeObject = async function (id, type) {
@@ -859,7 +1133,8 @@ const Observatory = new ObservatoryModel({
     galaxies: Galaxies,
     systems: Systems,
     centralStars: CentralStars,
-    planets: Planets
+    planets: Planets,
+    observers: Observers
 });
 
 module.exports = Observatory;

@@ -12,7 +12,7 @@ const planetsDataSchema = new Schema({
     weight: Number,
     speed: Number,
     discoverer: String,
-    systemId: Number,
+    systemId: String,
     position: {
         x: Number,
         y: Number
@@ -25,7 +25,8 @@ const planetsDataSchema = new Schema({
     imageName: String,
     parentRadius: Number,
     angle: Number,
-    orbitSpeed: Number
+    orbitSpeed: Number,
+    observers: [String]
 });
 
 exports.PlanetsDataSchema = mongoose.model('PlanetsDataSchema', planetsDataSchema);

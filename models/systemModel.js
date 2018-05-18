@@ -12,7 +12,7 @@ const systemsDataSchema = new Schema({
     weight: Number,
     speed: Number,
     discoverer: String,
-    galaxyId: Number,
+    galaxyId: String,
     position: {
         x: Number,
         y: Number
