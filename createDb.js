@@ -37,9 +37,7 @@ async.series([
     checkObservers
 ], function (err) {
     if (err) {
-        console.log(err)
-        process.exit(err ? 255 : 0);
-        throw new Error(err);
+        return new Error(err)
     }
     console.log('INIT')
 });
@@ -47,7 +45,7 @@ async.series([
 function open(callback) {
     mongoose.connection.on('open', function (err) {
         if (err) {
-            throw new Error(err);
+            return new Error(err)
         }
         callback(null, 'open')
     });
@@ -59,9 +57,8 @@ function checkUniverse(mainCallback) {
         function (callback) {
             UniverseDataSchema.find({}, function (error, res) {
                 if (error) {
-                    throw new Error(error);
+                    return new Error(error)
                 }
-                // console.log(res)
                 callback(null, res);
             });
         },
@@ -69,7 +66,7 @@ function checkUniverse(mainCallback) {
             if (!universe || universe.length === 0) {
                 UniverseDataSchema.create(defaultUniverseData, function (err, res) {
                     if (err) {
-                        throw new Error(err);
+                        return new Error(err)
                     }
                 });
             }
@@ -77,7 +74,7 @@ function checkUniverse(mainCallback) {
         },
     ], function (err, result) {
         if (err) {
-            throw new Error(err);
+            return new Error(err)
         }
         mainCallback(null, 'universe')
     });
@@ -90,7 +87,7 @@ function checkGalaxies(mainCallback) {
         function (callback) {
             GalaxiesDataSchema.find({}, function (error, res) {
                 if (error) {
-                    throw new Error(error);
+                    return new Error(error)
                 }
                 callback(null, res);
             });
@@ -106,7 +103,7 @@ function checkGalaxies(mainCallback) {
         }
     ], function (err, result) {
         if (err) {
-            throw new Error(err);
+            return new Error(err)
         }
         mainCallback(null, 'galaxy')
     });
@@ -118,7 +115,7 @@ function checkSystems(mainCallback) {
         function (callback) {
             SystemsDataSchema.find({}, function (error, res) {
                 if (error) {
-                    throw new Error(error);
+                    return new Error(error)
                 }
                 callback(null, res);
             });
@@ -129,6 +126,7 @@ function checkSystems(mainCallback) {
                     function (callback_2) {
                         GalaxiesDataSchema.findOne({name: 'Milky Way'}, function (err, galaxy) {
                             if (err) {
+                                return new Error(err)
                             }
                             callback_2(null, galaxy);
                         })
@@ -147,7 +145,7 @@ function checkSystems(mainCallback) {
         },
     ], function (err, result) {
         if (err) {
-            throw new Error(err);
+            return new Error(err)
         }
         mainCallback(null, 'system')
     });
@@ -157,9 +155,9 @@ function checkCentralStars(mainCallback) {
     // await CentralStarsDataSchema.remove({});
     async.waterfall([
         function (callback) {
-            CentralStarsDataSchema.find({}, function (error, res) {
-                if (error) {
-                    throw new Error(error);
+            CentralStarsDataSchema.find({}, function (err, res) {
+                if (err) {
+                    return new Error(err)
                 }
                 callback(null, res);
             });
@@ -170,6 +168,7 @@ function checkCentralStars(mainCallback) {
                     function (callback_2) {
                         SystemsDataSchema.findOne({name: 'Solar System'}, function (err, system) {
                             if (err) {
+                                return new Error(err)
                             }
                             callback_2(null, system);
                         })
@@ -188,7 +187,7 @@ function checkCentralStars(mainCallback) {
         },
     ], function (err, result) {
         if (err) {
-            throw new Error(err);
+            return new Error(err)
         }
         mainCallback(null, 'star')
     });
@@ -198,9 +197,9 @@ function checkPlanets(mainCallback) {
     //  await PlanetsDataSchema.remove({});
     async.waterfall([
         function (callback) {
-            PlanetsDataSchema.find({}, function (error, res) {
-                if (error) {
-                    throw new Error(error);
+            PlanetsDataSchema.find({}, function (err, res) {
+                if (err) {
+                    return new Error(err)
                 }
                 callback(null, res);
             });
@@ -211,6 +210,7 @@ function checkPlanets(mainCallback) {
                     function (callback_2) {
                         SystemsDataSchema.findOne({name: 'Solar System'}, function (err, system) {
                             if (err) {
+                                return new Error(err)
                             }
                             callback_2(null, system);
                         })
@@ -229,7 +229,7 @@ function checkPlanets(mainCallback) {
         },
     ], function (err, result) {
         if (err) {
-            throw new Error(err);
+            return new Error(err)
         }
         mainCallback(null, 'planet')
     });
@@ -239,9 +239,9 @@ function checkObservers(mainCallback) {
     // ObserversDataSchema.remove({});
     async.waterfall([
         function (callback) {
-            ObserversDataSchema.find({}, function (error, res) {
-                if (error) {
-                    throw new Error(error);
+            ObserversDataSchema.find({}, function (err, res) {
+                if (err) {
+                    return new Error(err)
                 }
                 callback(null, res);
             });
@@ -257,23 +257,23 @@ function checkObservers(mainCallback) {
         },
     ], function (err, result) {
         if (err) {
-            throw new Error(err);
+            return new Error(err)
         }
         mainCallback(null, 'observer')
     });
 }
 
 universeSchema.statics.getUniverse = async function () {
-    let _universe = {};
-    await UniverseDataSchema.find({type: 'Universe'}, function (error, res) {
-        if (error) {
-            throw new Error(error);
-        }
-        if (res && res.length > 0) {
-            _universe = generateUniverseData(res[0]);
-        }
+    return new Promise((resolve, reject) => {
+        UniverseDataSchema.find({}, function (err, res) {
+            if (err) {
+                return new Error(err)
+            }
+            if (res && res.length > 0) {
+                resolve(generateUniverseData(res[0]));
+            }
+        });
     });
-    return _universe || {};
 };
 
 function generateUniverseData(univ) {
@@ -296,19 +296,21 @@ function generateUniverseData(univ) {
 }
 
 galaxiesSchema.statics.getGalaxies = async function () {
-    let _galaxies = [];
-    await GalaxiesDataSchema.find({type: 'Galaxy'}, function (error, res) {
-        if (error) {
-            throw new Error(error);
-        }
-        if (res) {
-            res.forEach((gal) => {
-                const galaxy = generateGalaxyData(gal);
-                _galaxies.push(galaxy);
-            });
-        }
+    return new Promise((resolve, reject) => {
+        GalaxiesDataSchema.find({}, function (err, res) {
+            if (err) {
+                return new Error(err)
+            }
+            if (res) {
+                let _galaxies = [];
+                res.forEach((gal) => {
+                    const galaxy = generateGalaxyData(gal);
+                    _galaxies.push(galaxy);
+                });
+                resolve(_galaxies);
+            }
+        });
     });
-    return _galaxies || [];
 };
 
 galaxiesSchema.statics.getGalaxyById = async function (id) {
@@ -346,7 +348,7 @@ galaxiesSchema.statics.getSystemsByGalaxyId = async function (id) {
     let systems = [];
     await SystemsDataSchema.find({galaxyId: id}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data) {
             data.forEach((system) => {
@@ -358,26 +360,28 @@ galaxiesSchema.statics.getSystemsByGalaxyId = async function (id) {
 };
 
 systemsSchema.statics.getSystems = async function () {
-    let _systems = [];
-    await SystemsDataSchema.find({type: 'System'}, function (error, res) {
-        if (error) {
-            throw new Error(error);
-        }
-        if (res) {
-            res.forEach((sys) => {
-                const system = generateSystemData(sys);
-                _systems.push(system);
-            });
-        }
+    return new Promise((resolve, reject) => {
+        SystemsDataSchema.find({}, function (err, res) {
+            if (err) {
+                return new Error(err)
+            }
+            if (res) {
+                let _systems = [];
+                res.forEach((sys) => {
+                    const system = generateSystemData(sys);
+                    _systems.push(system);
+                });
+                resolve(_systems);
+            }
+        });
     });
-    return _systems || [];
 };
 
 systemsSchema.statics.getSystemById = async function (id) {
     let system;
     await SystemsDataSchema.findOne({_id: id}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data) {
             system = generateSystemData(data);
@@ -414,7 +418,7 @@ systemsSchema.statics.getCentralStarsBySystemId = async function (id) {
     let stars = [];
     await CentralStarsDataSchema.find({systemId: id}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data) {
             data.forEach((star) => {
@@ -429,7 +433,7 @@ systemsSchema.statics.getPlanetsBySystemId = async function (id) {
     let planets = [];
     await PlanetsDataSchema.find({systemId: id}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data && data.length > 0) {
             data.forEach((planet) => {
@@ -441,26 +445,28 @@ systemsSchema.statics.getPlanetsBySystemId = async function (id) {
 };
 
 centralStarsSchema.statics.getCentralStars = async function () {
-    let _centralStars = [];
-    await CentralStarsDataSchema.find({type: 'Star'}, function (error, res) {
-        if (error) {
-            throw new Error(error);
-        }
-        if (res) {
-            res.forEach((center) => {
-                const star = generateStarData(center);
-                _centralStars.push(star);
-            });
-        }
+    return new Promise((resolve, reject) => {
+        CentralStarsDataSchema.find({}, function (err, res) {
+            if (err) {
+                return new Error(err)
+            }
+            if (res) {
+                let _centralStars = [];
+                res.forEach((center) => {
+                    const star = generateStarData(center);
+                    _centralStars.push(star);
+                });
+                resolve(_centralStars)
+            }
+        });
     });
-    return _centralStars || [];
 };
 
 centralStarsSchema.statics.getCentralStarById = async function (id) {
     let star;
     await CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data) {
             star = generateStarData(data);
@@ -490,27 +496,29 @@ function generateStarData(center) {
     };
 }
 
-planetsSchema.statics.getPlanets = async function () {
-    let _planets = [];
-    await PlanetsDataSchema.find({type: 'Planet'}, function (error, res) {
-        if (error) {
-            throw new Error(error);
-        }
-        if (res) {
-            res.forEach((plan) => {
-                const planet = generatePlanetData(plan);
-                _planets.push(planet);
-            });
-        }
+planetsSchema.statics.getPlanets = function () {
+    return new Promise((resolve, reject) => {
+        PlanetsDataSchema.find({}, function (err, res) {
+            if (err) {
+                return new Error(err)
+            }
+            if (res) {
+                let _planets = [];
+                res.forEach((plan) => {
+                    const planet = generatePlanetData(plan);
+                    _planets.push(planet);
+                });
+                resolve(_planets);
+            }
+        })
     });
-    return _planets || [];
 };
 
 planetsSchema.statics.getPlanetById = async function (id) {
     let planet = null;
     await PlanetsDataSchema.findOne({_id: id}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data) {
             planet = generatePlanetData(data);
@@ -548,7 +556,7 @@ observersSchema.statics.getObservers = async function () {
     let observers = [];
     await ObserversDataSchema.find({}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data && data.length > 0) {
             data.forEach((observer) => {
@@ -564,9 +572,8 @@ observersSchema.statics.setObservers = async function (data) {
     const planetId = data['planetId'];
     await ObserversDataSchema.findOne({_id: observerId}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
-        console.log(data)
         if (data) {
             if (data.observablePlanets && data.observablePlanets.length > 0) {
                 let isExist = false;
@@ -588,7 +595,7 @@ observersSchema.statics.setObservers = async function (data) {
     });
     await PlanetsDataSchema.findOne({_id: planetId}, function (err, data) {
         if (err) {
-
+            return new Error(err)
         }
         if (data) {
             if (data.observers && data.observers.length > 0) {
@@ -965,12 +972,12 @@ const observatorySchema = new Schema({
 });
 
 observatorySchema.methods.getAllSpaceObjects = async function () {
-     const universe = [await Observatory.universe.getUniverse()];
-     const galaxies = await Observatory.galaxies.getGalaxies();
-     const systems = await Observatory.systems.getSystems();
-     const centralStars = await Observatory.centralStars.getCentralStars();
-     const planets = await Observatory.planets.getPlanets();
-     return universe.concat(galaxies, systems, centralStars, planets);
+    const universe = [await Observatory.universe.getUniverse()];
+    const galaxies = await Observatory.galaxies.getGalaxies();
+    const systems = await Observatory.systems.getSystems();
+    const centralStars = await Observatory.centralStars.getCentralStars();
+    const planets = await Observatory.planets.getPlanets();
+    return universe.concat(galaxies, systems, centralStars, planets);
 };
 
 async function getSpaceObject(id, type, callBack) {
@@ -983,7 +990,7 @@ async function getSpaceObject(id, type, callBack) {
         case 'Galaxy':
             await GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
                 if (err) {
-                    // TODO: Handle the error!
+                    return new Error(err)
                 } else {
                     if (data && !callBack) {
                         object = generateGalaxyData(data);
@@ -999,7 +1006,7 @@ async function getSpaceObject(id, type, callBack) {
         case 'System':
             await SystemsDataSchema.findOne({_id: id}, function (err, data) {
                 if (err) {
-                    // TODO: Handle the error!
+                    return new Error(err)
                 } else {
                     if (data && !callBack) {
                         object = generateGalaxyData(data);
@@ -1015,7 +1022,7 @@ async function getSpaceObject(id, type, callBack) {
         case 'Star':
             await CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
                 if (err) {
-                    // TODO: Handle the error!
+                    return new Error(err)
                 } else {
                     if (data && !callBack) {
                         object = generateStarData(data);
@@ -1031,7 +1038,7 @@ async function getSpaceObject(id, type, callBack) {
         case 'Planet':
             await PlanetsDataSchema.findOne({_id: id}, function (err, data) {
                 if (err) {
-                    // TODO: Handle the error!
+                    return new Error(err)
                 } else {
                     if (data && !callBack) {
                         object = generatePlanetData(data);
@@ -1124,7 +1131,6 @@ observatorySchema.methods.removeObject = async function (id, type) {
     };
     return await getSpaceObject(id, type, callBack);
 };
-
 
 ObservatoryModel = mongoose.model('ObservatoryModel', observatorySchema);
 

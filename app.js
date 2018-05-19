@@ -11,6 +11,7 @@ const bodyParser = require('body-parser')
 const session = require('express-session');
 const favicon = require('express-favicon');
 const sessionStore = require('./lib/sessionStore');
+const errorHandler = require('errorhandler');
 
 const app = express();
 const router = express.Router();
@@ -82,7 +83,7 @@ app.use(function (err, req, res, next) {
         res.sendHttpError(err);
     } else {
         if (app.get('env') === 'development') {
-            express.errorHandler()(err, req, res, next);
+            errorHandler()(err, req, res, next);
         } else {
             log.error(err);
             err = new HttpError(500);
