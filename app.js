@@ -69,16 +69,12 @@ app.use(function (req, res, next) {
     next();
 });
 
-//app.use(app.router);
-
 require('./routes')(app);
-
 
 app.use(function (err, req, res, next) {
     if (typeof err === 'number') {
         err = new HttpError(err);
     }
-
     if (err instanceof HttpError) {
         res.sendHttpError(err);
     } else {
@@ -91,9 +87,6 @@ app.use(function (err, req, res, next) {
         }
     }
 });
-
-
-
 
 const server = http.createServer(app);
 server.listen(config.get('port'), function () {

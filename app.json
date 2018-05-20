@@ -1,0 +1,6 @@
+{
+  "name": "Observatory server: university project",
+  "description": "University project created by Ivan Telychkin",
+  "repository": "https://github.com/itelichkin/observatory-server",
+  "keywords": ["node", "express"]
+}

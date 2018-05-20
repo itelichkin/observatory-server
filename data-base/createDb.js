@@ -1,12 +1,12 @@
-const mongoose = require('./lib/mongoose');
+const mongoose = require('../lib/mongoose');
 const async = new require('async');
-const config = require('./config');
-require('./models/universeModel');
-require('./models/galaxyModel');
-require('./models/systemModel');
-require('./models/centralStarModel');
-require('./models/planetModel');
-require('./models/observerModel');
+const config = require('../config');
+require('../models/universeModel');
+require('../models/galaxyModel');
+require('../models/systemModel');
+require('../models/centralStarModel');
+require('../models/planetModel');
+require('../models/observerModel');
 
 const Schema = mongoose.Schema;
 

@@ -1,4 +1,4 @@
-const observatoryDB = new require('../createDb');
+const observatoryDB = new require('../data-base/createDb');
 
 module.exports = function (app) {
 
