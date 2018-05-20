@@ -1008,7 +1008,7 @@ async function getSpaceObject(id, type, callBack) {
                     return new Error(err)
                 } else {
                     if (data && !callBack) {
-                        object = generateGalaxyData(data);
+                        object = generateSystemData(data);
                     } else if (data && callBack) {
                         callBack(data);
                         object = true;
