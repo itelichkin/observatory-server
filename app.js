@@ -91,4 +91,5 @@ app.use(function (err, req, res, next) {
 const server = http.createServer(app);
 server.listen(config.get('port'), function () {
     log.info('Express server listening on port ' + config.get('port'));
+    console.log('Express server listening on port ' + config.get('port'));
 });
