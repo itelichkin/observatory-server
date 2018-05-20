@@ -772,7 +772,6 @@ const defaultCentralStarsData = [
         weight: 1,
         speed: 2.2,
         discoverer: null,
-        systemId: 5,
         position: {
             x: 600,
             y: 380
