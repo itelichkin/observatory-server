@@ -15,6 +15,7 @@ const errorHandler = require('errorhandler');
 
 const app = express();
 const router = express.Router();
+const PORT = process.env.PORT || config.get('port');
 
 
 app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -89,7 +90,7 @@ app.use(function (err, req, res, next) {
 });
 
 const server = http.createServer(app);
-server.listen(config.get('port'), function () {
+server.listen(PORT, function () {
     log.info('Express server listening on port ' + config.get('port'));
     console.log('Express server listening on port ' + config.get('port'));
 });
