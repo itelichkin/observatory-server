@@ -263,7 +263,7 @@ function checkObservers(mainCallback) {
     });
 }
 
-universeSchema.statics.getUniverse = async function () {
+universeSchema.statics.getUniverse = function () {
     return new Promise((resolve, reject) => {
         UniverseDataSchema.find({}, function (err, res) {
             if (err) {
@@ -271,6 +271,8 @@ universeSchema.statics.getUniverse = async function () {
             }
             if (res && res.length > 0) {
                 resolve(generateUniverseData(res[0]));
+            } else {
+                resolve(null);
             }
         });
     });
@@ -295,35 +297,37 @@ function generateUniverseData(univ) {
     }
 }
 
-galaxiesSchema.statics.getGalaxies = async function () {
+galaxiesSchema.statics.getGalaxies = function () {
     return new Promise((resolve, reject) => {
         GalaxiesDataSchema.find({}, function (err, res) {
             if (err) {
                 return new Error(err)
             }
+            let _galaxies = [];
             if (res) {
-                let _galaxies = [];
                 res.forEach((gal) => {
                     const galaxy = generateGalaxyData(gal);
                     _galaxies.push(galaxy);
                 });
-                resolve(_galaxies);
             }
+            resolve(_galaxies);
         });
     });
 };
 
-galaxiesSchema.statics.getGalaxyById = async function (id) {
-    let galaxy;
-    await GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
-        if (err) {
-
-        }
-        if (data) {
-            galaxy = generateGalaxyData(data);
-        }
+galaxiesSchema.statics.getGalaxyById = function (id) {
+    return new Promise((resolve, reject) => {
+        GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            let galaxy = null;
+            if (data) {
+                galaxy = generateGalaxyData(data);
+            }
+            resolve(galaxy);
+        });
     });
-    return galaxy;
 };
 
 function generateGalaxyData(gal) {
@@ -344,50 +348,54 @@ function generateGalaxyData(gal) {
     }
 }
 
-galaxiesSchema.statics.getSystemsByGalaxyId = async function (id) {
-    let systems = [];
-    await SystemsDataSchema.find({galaxyId: id}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data) {
-            data.forEach((system) => {
-                systems.push(generateSystemData(system))
-            });
-        }
+galaxiesSchema.statics.getSystemsByGalaxyId = function (id) {
+    return new Promise((resolve, reject) => {
+        SystemsDataSchema.find({galaxyId: id}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            const systems = [];
+            if (data) {
+                data.forEach((system) => {
+                    systems.push(generateSystemData(system))
+                });
+            }
+            resolve(systems);
+        });
     });
-    return systems;
 };
 
-systemsSchema.statics.getSystems = async function () {
+systemsSchema.statics.getSystems = function () {
     return new Promise((resolve, reject) => {
         SystemsDataSchema.find({}, function (err, res) {
             if (err) {
                 return new Error(err)
             }
+            const _systems = [];
             if (res) {
-                let _systems = [];
                 res.forEach((sys) => {
                     const system = generateSystemData(sys);
                     _systems.push(system);
                 });
-                resolve(_systems);
             }
+            resolve(_systems);
         });
     });
 };
 
-systemsSchema.statics.getSystemById = async function (id) {
-    let system;
-    await SystemsDataSchema.findOne({_id: id}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data) {
-            system = generateSystemData(data);
-        }
+systemsSchema.statics.getSystemById = function (id) {
+    return new Promise((resolve, reject) => {
+        SystemsDataSchema.findOne({_id: id}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            let system;
+            if (data) {
+                system = generateSystemData(data);
+            }
+            resolve(system);
+        });
     });
-    return system;
 };
 
 function generateSystemData(sys) {
@@ -414,65 +422,71 @@ function generateSystemData(sys) {
     }
 }
 
-systemsSchema.statics.getCentralStarsBySystemId = async function (id) {
-    let stars = [];
-    await CentralStarsDataSchema.find({systemId: id}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data) {
-            data.forEach((star) => {
-                stars.push(generatePlanetData(star))
-            });
-        }
+systemsSchema.statics.getCentralStarsBySystemId = function (id) {
+    return new Promise((resolve, reject) => {
+        CentralStarsDataSchema.find({systemId: id}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            const stars = [];
+            if (data) {
+                data.forEach((star) => {
+                    stars.push(generateStarData(star))
+                });
+            }
+            resolve(stars);
+        });
     });
-    return stars;
 };
 
-systemsSchema.statics.getPlanetsBySystemId = async function (id) {
-    let planets = [];
-    await PlanetsDataSchema.find({systemId: id}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data && data.length > 0) {
-            data.forEach((planet) => {
-                planets.push(generatePlanetData(planet))
-            });
-        }
+systemsSchema.statics.getPlanetsBySystemId = function (id) {
+    return new Promise((resolve, reject) => {
+        PlanetsDataSchema.find({systemId: id}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            const planets = [];
+            if (data && data.length > 0) {
+                data.forEach((planet) => {
+                    planets.push(generatePlanetData(planet))
+                });
+            }
+            resolve(planets);
+        });
     });
-    return planets;
 };
 
-centralStarsSchema.statics.getCentralStars = async function () {
+centralStarsSchema.statics.getCentralStars = function () {
     return new Promise((resolve, reject) => {
         CentralStarsDataSchema.find({}, function (err, res) {
             if (err) {
                 return new Error(err)
             }
+            const _centralStars = [];
             if (res) {
-                let _centralStars = [];
                 res.forEach((center) => {
                     const star = generateStarData(center);
                     _centralStars.push(star);
                 });
-                resolve(_centralStars)
             }
+            resolve(_centralStars)
         });
     });
 };
 
-centralStarsSchema.statics.getCentralStarById = async function (id) {
-    let star;
-    await CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data) {
-            star = generateStarData(data);
-        }
+centralStarsSchema.statics.getCentralStarById = function (id) {
+    return new Promise((resolve, reject) => {
+        CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            let star = null;
+            if (data) {
+                star = generateStarData(data);
+            }
+            resolve(star);
+        });
     });
-    return star;
 };
 
 function generateStarData(center) {
@@ -502,29 +516,31 @@ planetsSchema.statics.getPlanets = function () {
             if (err) {
                 return new Error(err)
             }
+            const _planets = [];
             if (res) {
-                let _planets = [];
                 res.forEach((plan) => {
                     const planet = generatePlanetData(plan);
                     _planets.push(planet);
                 });
-                resolve(_planets);
             }
+            resolve(_planets);
         })
     });
 };
 
-planetsSchema.statics.getPlanetById = async function (id) {
-    let planet = null;
-    await PlanetsDataSchema.findOne({_id: id}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data) {
-            planet = generatePlanetData(data);
-        }
+planetsSchema.statics.getPlanetById = function (id) {
+    return new Promise((resolve, reject) => {
+        PlanetsDataSchema.findOne({_id: id}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            let planet = null;
+            if (data) {
+                planet = generatePlanetData(data);
+            }
+            resolve(planet);
+        });
     });
-    return planet;
 };
 
 function generatePlanetData(plan) {
@@ -552,71 +568,82 @@ function generatePlanetData(plan) {
     };
 }
 
-observersSchema.statics.getObservers = async function () {
-    let observers = [];
-    await ObserversDataSchema.find({}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data && data.length > 0) {
-            data.forEach((observer) => {
-                observers.push({id: observer._id, name: observer.name, observablePlanets: observer.observablePlanets});
-            })
-        }
+observersSchema.statics.getObservers = function () {
+    return new Promise((resolve, reject) => {
+        ObserversDataSchema.find({}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            const observers = [];
+            if (data && data.length > 0) {
+                data.forEach((observer) => {
+                    observers.push({
+                        id: observer._id,
+                        name: observer.name,
+                        observablePlanets: observer.observablePlanets
+                    });
+                })
+            }
+            resolve(observers);
+        });
     });
-    return observers;
 };
 
-observersSchema.statics.setObservers = async function (data) {
+observersSchema.statics.setObservers = function (data) {
     const observerId = data['observerId'];
     const planetId = data['planetId'];
-    await ObserversDataSchema.findOne({_id: observerId}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data) {
-            if (data.observablePlanets && data.observablePlanets.length > 0) {
-                let isExist = false;
-                data.observablePlanets.some((planet) => {
-                    if (planet === planetId) {
-                        isExist = true;
-                        return true;
+    return new Promise((resolve, reject) => {
+        ObserversDataSchema.findOne({_id: observerId}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            if (data) {
+                if (data.observablePlanets && data.observablePlanets.length > 0) {
+                    let isExist = false;
+                    data.observablePlanets.some((planet) => {
+                        if (planet === planetId) {
+                            isExist = true;
+                            return true;
+                        }
+                    });
+                    if (!isExist) {
+                        data.observablePlanets.push(planetId);
+                        data.save();
                     }
-                });
-                if (!isExist) {
+                } else {
                     data.observablePlanets.push(planetId);
                     data.save();
                 }
-            } else {
-                data.observablePlanets.push(planetId);
-                data.save();
             }
-        }
-    });
-    await PlanetsDataSchema.findOne({_id: planetId}, function (err, data) {
-        if (err) {
-            return new Error(err)
-        }
-        if (data) {
-            if (data.observers && data.observers.length > 0) {
-                let isExist = false;
-                data.observers.some((observer) => {
-                    if (observer === observerId) {
-                        isExist = true;
-                        return true;
+        });
+        PlanetsDataSchema.findOne({_id: planetId}, function (err, data) {
+            if (err) {
+                return new Error(err)
+            }
+            if (data) {
+                if (data.observers && data.observers.length > 0) {
+                    let isExist = false;
+                    data.observers.some((observer) => {
+                        if (observer === observerId) {
+                            isExist = true;
+                            return true;
+                        }
+                    });
+                    if (!isExist) {
+                        data.observers.push(observerId);
+                        data.save();
                     }
-                });
-                if (!isExist) {
+                } else {
                     data.observers.push(observerId);
                     data.save();
                 }
+                resolve({modify: true})
             } else {
-                data.observers.push(observerId);
-                data.save();
+                resolve({modify: false})
             }
-        }
+
+        });
     });
-    return {modify: true}
 };
 
 const Universe = mongoose.model('Universe', universeSchema);
@@ -980,84 +1007,88 @@ observatorySchema.methods.getAllSpaceObjects = async function () {
 };
 
 async function getSpaceObject(id, type, callBack) {
-    let object;
-    switch (type) {
-        case 'Universe':
-            const universe = await Observatory.universe.getUniverse();
-            if (universe.id.toString() === id.toString()) object = generateUniverseData(universe);
-            break;
-        case 'Galaxy':
-            await GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
-                if (err) {
-                    return new Error(err)
-                } else {
-                    if (data && !callBack) {
-                        object = generateGalaxyData(data);
-                    } else if (data && callBack) {
-                        callBack(data);
-                        object = true;
+    return new Promise(async (resolve, reject) => {
+        let object = null;
+        switch (type) {
+            case 'Universe':
+                const universe = await Observatory.universe.getUniverse();
+                if (universe.id.toString() === id.toString()) object = generateUniverseData(universe);
+                break;
+            case 'Galaxy':
+                await GalaxiesDataSchema.findOne({_id: id}, function (err, data) {
+                    if (err) {
+                        return new Error(err)
                     } else {
-                        object = null;
+                        if (data && !callBack) {
+                            object = generateGalaxyData(data);
+                        } else if (data && callBack) {
+                            callBack(data);
+                            object = true;
+                        } else {
+                            object = null;
+                        }
                     }
-                }
-            });
-            break;
-        case 'System':
-            await SystemsDataSchema.findOne({_id: id}, function (err, data) {
-                if (err) {
-                    return new Error(err)
-                } else {
-                    if (data && !callBack) {
-                        object = generateSystemData(data);
-                    } else if (data && callBack) {
-                        callBack(data);
-                        object = true;
+                });
+                break;
+            case 'System':
+                await SystemsDataSchema.findOne({_id: id}, function (err, data) {
+                    if (err) {
+                        return new Error(err)
                     } else {
-                        object = null;
+                        if (data && !callBack) {
+                            object = generateSystemData(data);
+                        } else if (data && callBack) {
+                            callBack(data);
+                            object = true;
+                        } else {
+                            object = null;
+                        }
                     }
-                }
-            });
-            break;
-        case 'Star':
-            await CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
-                if (err) {
-                    return new Error(err)
-                } else {
-                    if (data && !callBack) {
-                        object = generateStarData(data);
-                    } else if (data && callBack) {
-                        callBack(data);
-                        object = true;
+                });
+                break;
+            case 'Star':
+                await CentralStarsDataSchema.findOne({_id: id}, function (err, data) {
+                    if (err) {
+                        return new Error(err)
                     } else {
-                        object = null;
+                        if (data && !callBack) {
+                            object = generateStarData(data);
+                        } else if (data && callBack) {
+                            callBack(data);
+                            object = true;
+                        } else {
+                            object = null;
+                        }
                     }
-                }
-            });
-            break;
-        case 'Planet':
-            await PlanetsDataSchema.findOne({_id: id}, function (err, data) {
-                if (err) {
-                    return new Error(err)
-                } else {
-                    if (data && !callBack) {
-                        object = generatePlanetData(data);
-                    } else if (data && callBack) {
-                        callBack(data);
-                        object = true;
+                });
+                break;
+            case 'Planet':
+                await PlanetsDataSchema.findOne({_id: id}, function (err, data) {
+                    if (err) {
+                        return new Error(err)
                     } else {
-                        object = null;
+                        if (data && !callBack) {
+                            object = generatePlanetData(data);
+                        } else if (data && callBack) {
+                            callBack(data);
+                            object = true;
+                        } else {
+                            object = null;
+                        }
                     }
-                }
-            });
-            break;
-        default:
-            object = null;
-    }
-    return object;
+                });
+                break;
+            default:
+                object = null;
+        }
+        resolve(object)
+    });
 }
 
 observatorySchema.methods.getObjectById = async function (id, type) {
-    return await getSpaceObject(id, type, null);
+    return new Promise((resolve, reject) => {
+        resolve(getSpaceObject(id, type, null))
+    });
 };
 
 observatorySchema.methods.createSpaceObject = async function (data) {

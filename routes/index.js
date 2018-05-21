@@ -6,10 +6,9 @@ module.exports = function (app) {
         let allObjects;
         try {
             allObjects = await observatoryDB.getAllSpaceObjects();
+            res.send(allObjects)
         } catch (e) {
             next(e)
-        } finally {
-            res.send(allObjects)
         }
     });
 
@@ -19,10 +18,9 @@ module.exports = function (app) {
         let object;
         try {
             object = await observatoryDB.removeObject(id, type);
+            res.send({removed: !!object});
         } catch (e) {
             next(e)
-        } finally {
-            res.send({removed: !!object});
         }
     });
 
@@ -32,10 +30,9 @@ module.exports = function (app) {
         let object;
         try {
             object = await observatoryDB.getObjectById(id, type);
+            res.send(object)
         } catch (e) {
             next(e)
-        } finally {
-            res.send(object)
         }
     });
 
@@ -43,10 +40,9 @@ module.exports = function (app) {
         let object;
         try {
             object = await observatoryDB.editObjectById(req.body);
+            res.send({modify: !!object});
         } catch (e) {
             next(e)
-        } finally {
-            res.send({modify: !!object});
         }
     });
 
@@ -54,10 +50,9 @@ module.exports = function (app) {
         let object;
         try {
             object = await observatoryDB.createSpaceObject(req.body);
+            res.send({saved: !!object});
         } catch (e) {
             next(e)
-        } finally {
-            res.send({saved: !!object});
         }
     });
 
@@ -65,10 +60,9 @@ module.exports = function (app) {
         let universe;
         try {
             universe = await observatoryDB.universe.getUniverse();
+            res.send(universe);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(universe);
         }
     });
 
@@ -76,10 +70,9 @@ module.exports = function (app) {
         let galaxies;
         try {
             galaxies = await observatoryDB.galaxies.getGalaxies();
+            res.send(galaxies);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(galaxies);
         }
     });
 
@@ -88,10 +81,9 @@ module.exports = function (app) {
         let galaxy;
         try {
             galaxy = await observatoryDB.galaxies.getGalaxyById(id);
+            res.send(galaxy);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(galaxy);
         }
     });
 
@@ -100,10 +92,9 @@ module.exports = function (app) {
         let galaxy;
         try {
             galaxy = await observatoryDB.galaxies.getSystemsByGalaxyId(id);
+            res.send(galaxy);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(galaxy);
         }
     });
 
@@ -111,10 +102,9 @@ module.exports = function (app) {
         let systems;
         try {
             systems = await observatoryDB.systems.getSystems();
+            res.send(systems);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(systems);
         }
     });
 
@@ -123,10 +113,9 @@ module.exports = function (app) {
         let system;
         try {
             system = await observatoryDB.systems.getSystemById(id);
+            res.send(system);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(system);
         }
     });
 
@@ -135,10 +124,9 @@ module.exports = function (app) {
         let stars;
         try {
             stars = await observatoryDB.systems.getCentralStarsBySystemId(id);
+            res.send(stars);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(stars);
         }
     });
 
@@ -147,10 +135,9 @@ module.exports = function (app) {
         let planets;
         try {
             planets = await observatoryDB.systems.getPlanetsBySystemId(id);
+            res.send(planets);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(planets);
         }
     });
 
@@ -159,10 +146,9 @@ module.exports = function (app) {
         let star;
         try {
             star = await observatoryDB.centralStars.getCentralStarById(id);
+            res.send(star);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(star);
         }
     });
 
@@ -170,10 +156,9 @@ module.exports = function (app) {
         let centralStars;
         try {
             centralStars = await observatoryDB.centralStars.getCentralStars();
+            res.send(centralStars);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(centralStars);
         }
     });
 
@@ -181,10 +166,9 @@ module.exports = function (app) {
         let planets;
         try {
             planets = await observatoryDB.planets.getPlanets();
+            res.send(planets);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(planets);
         }
     });
 
@@ -193,10 +177,9 @@ module.exports = function (app) {
         let planet;
         try {
             planet = await observatoryDB.planets.getPlanetById(id);
+            res.send(planet);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(planet);
         }
     });
 
@@ -204,10 +187,9 @@ module.exports = function (app) {
         let observers;
         try {
             observers = await observatoryDB.observers.getObservers();
+            res.send(observers);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(observers);
         }
     });
 
@@ -215,10 +197,9 @@ module.exports = function (app) {
         let observers;
         try {
             observers = await observatoryDB.observers.setObservers(req.body);
+            res.send(observers);
         } catch (e) {
             next(e)
-        } finally {
-            res.send(observers);
         }
     });
 };
