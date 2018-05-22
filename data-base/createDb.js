@@ -1086,9 +1086,7 @@ async function getSpaceObject(id, type, callBack) {
 }
 
 observatorySchema.methods.getObjectById = async function (id, type) {
-    return new Promise((resolve, reject) => {
-        resolve(getSpaceObject(id, type, null))
-    });
+    return getSpaceObject(id, type, null);
 };
 
 observatorySchema.methods.createSpaceObject = async function (data) {
@@ -1144,7 +1142,7 @@ observatorySchema.methods.editObjectById = async function (data) {
                 break;
         }
     };
-    return await getSpaceObject(data.id, data.type, callBack);
+    return getSpaceObject(data.id, data.type, callBack);
 };
 
 observatorySchema.methods.removeObject = async function (id, type) {
@@ -1159,7 +1157,7 @@ observatorySchema.methods.removeObject = async function (id, type) {
                 break;
         }
     };
-    return await getSpaceObject(id, type, callBack);
+    return getSpaceObject(id, type, callBack);
 };
 
 ObservatoryModel = mongoose.model('ObservatoryModel', observatorySchema);
