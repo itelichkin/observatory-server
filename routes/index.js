@@ -28,8 +28,10 @@ module.exports = function (app) {
         const id = req.query.id;
         const type = req.query.type;
         let object;
+        console.log('space-object', id, type)
         try {
             object = await observatoryDB.getObjectById(id, type);
+            console.log('object', !!object)
             res.send(object)
         } catch (e) {
             next(e)
